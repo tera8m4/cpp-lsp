@@ -32,6 +32,8 @@ CPMAddPackage(
   OPTIONS "SPDLOG_USE_STD_FORMAT 1"
 )
 
+CPMAddPackage("gh:nlohmann/json@3.11.3")
+
 # ---- Add source files ----
 
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
@@ -50,7 +52,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:spdlog>)
+target_link_libraries(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:spdlog> PUBLIC $<BUILD_INTERFACE:nlohmann_json>)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
