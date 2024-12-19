@@ -1,7 +1,7 @@
 #include "transport/stdio_transport.h"
 #include <iostream>
 
-void stdio_transport::send(const std::string_view in_message) {
+void stdio_transport::send_internal(const std::string &in_message) {
   std::cout << in_message;
   std::cout.flush();
 }

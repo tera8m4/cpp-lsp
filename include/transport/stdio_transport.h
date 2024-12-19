@@ -1,10 +1,12 @@
 #pragma once
 
 #include "transport/transport.h"
-#include <string_view>
+#include <string>
 
 class stdio_transport : public transport {
 public:
-  void send(std::string_view in_message) override;
   std::string receive() override;
+
+protected:
+  void send_internal(const std::string &in_message) override;
 };

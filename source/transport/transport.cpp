@@ -1,5 +1,15 @@
 #include "transport/transport.h"
+#include <format>
 #include <spdlog/spdlog.h>
+
+void transport::send(std::string_view in_message) {
+  constexpr std::string_view MESSAGE_FORMAT =
+      "Content-Length: {0}\x0d\x0a\x0d\x0a{1}";
+  const std::string result =
+      "Content-Length: " + std::to_string(in_message.size()) + "\r\n\r\n" +
+      std::string{in_message};
+  send_internal(result);
+}
 
 std::string transport::read_message(std::istream &input) {
   constexpr std::string_view content_length_header = "Content-Length: ";
@@ -21,10 +31,12 @@ std::string transport::read_message(std::istream &input) {
     }
 
     // skip next two bytes of \r\n
-    input.ignore(2);
+    while (input.peek() != '{' && content_length > 0) {
+      input.ignore(1);
+    }
 
     std::string message(content_length, '\0');
-    input.get(const_cast<char *>(message.data()), content_length + 1, '\0');
+    input.read(const_cast<char *>(message.data()), content_length);
 
     return message;
   }

@@ -15,6 +15,17 @@ enum class request_method : uint32_t {
   none = 0
 };
 
+inline std::string_view to_string(const request_method method) {
+  switch (method) {
+  case request_method::initialize:
+    return "initialize";
+  case request_method::initialized:
+    return "initialized";
+  default:
+    return "undefined";
+  }
+}
+
 struct base_params {
   virtual ~base_params() = default;
 };

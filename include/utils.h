@@ -14,4 +14,6 @@ template <typename T> constexpr uint32_t fnv_hash(T &&s) {
   return hash;
 }
 
+void wait_for_debugger();
+
 } // namespace utils

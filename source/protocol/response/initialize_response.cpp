@@ -3,7 +3,7 @@
 namespace lsp::response::initialize {
 using json = nlohmann::json;
 void result::to_json(json &j) const {
-  j = json{{"capabilities", {}},
+  j = json{{"capabilities", {{"textDocumentSync", 1}}},
            {"serverInfo",
             {{"name", server_info.name}, {"version", server_info.version}}}};
 }

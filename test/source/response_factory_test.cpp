@@ -27,5 +27,6 @@ TEST_CASE("response to initailize request") {
     CHECK(response_json["result"]["serverInfo"]["version"].get<std::string>() ==
           "0.0.1-alpha");
     CHECK(response_json["jsonrpc"].get<std::string>() == "2.0");
+    CHECK(response_json["result"]["capabilities"].is_object());
   }
 }

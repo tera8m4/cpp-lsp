@@ -1,5 +1,12 @@
 #include "protocol/response/response.h"
 
+std::string response_message::to_string() const {
+  using nlohmann::json;
+  json j = *this;
+
+  return j.dump();
+}
+
 void to_json(nlohmann::json &j, const response_message &in_response) {
   using nlohmann::json;
   j = json{{"jsonrpc", "2.0"}, {"id", in_response.id}};
