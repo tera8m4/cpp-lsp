@@ -12,6 +12,7 @@ std::unique_ptr<base_result> create_initalize_result() {
   auto res = std::make_unique<result>();
   res->server_info.name = "my-cpp-lsp";
   res->server_info.version = "0.0.1-alpha";
+  res->capabilities.text_document_sync = text_document_sync_type::full;
 
   return std::move(res);
 }
@@ -23,6 +24,8 @@ response_message response_factory::create(const request &in_request) const {
   case request_method::initialize: {
     result = create_initalize_result();
   } break;
+  case request_method::initialized:
+    break;
   default:
     spdlog::info("failed to create response for {0}",
                  to_string(in_request.method));

@@ -11,7 +11,7 @@ TEST_CASE("transport parsing operations") {
   }
 
   SUBCASE("Valid input with correct Content-Length header") {
-    std::istringstream input("Content-Length: 13\r\n\r\n{\"key\":\"value\"}");
+    std::istringstream input("Content-Length: 15\r\n\r\n{\"key\":\"value\"}");
     std::string expected = "{\"key\":\"value\"}";
     CHECK(transport::read_message(input) == expected);
   }
@@ -28,7 +28,7 @@ TEST_CASE("transport parsing operations") {
 
   SUBCASE("Multiline JSON content") {
     std::istringstream input(
-        "Content-Length: 28\r\n\r\n{\"key1\":\"value1\",\n\"key2\": "
+        "Content-Length: 35\r\n\r\n{\"key1\":\"value1\",\n\"key2\": "
         "\"value2\"}");
     std::string expected = "{\"key1\":\"value1\",\n\"key2\": \"value2\"}";
     CHECK(transport::read_message(input) == expected);
