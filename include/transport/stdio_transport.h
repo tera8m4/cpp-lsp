@@ -5,6 +5,7 @@
 
 class stdio_transport : public transport {
 public:
+  stdio_transport();
   std::string receive() override;
 
 protected:

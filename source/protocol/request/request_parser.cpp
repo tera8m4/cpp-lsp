@@ -7,7 +7,8 @@ request request_parser::parse(const std::string_view request_message) {
 
   json data = json::parse(request_message);
   const std::string &method = data["method"].get<std::string>();
-  const int id = data["id"].get<int>();
+
+  const int id = data.value("id", -1);
 
   // the cast seems not safe
   request req{.id = id,

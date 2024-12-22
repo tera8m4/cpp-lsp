@@ -25,7 +25,7 @@ response_message response_factory::create(const request &in_request) const {
   } break;
   default:
     spdlog::info("failed to create response for {0}",
-                 static_cast<uint32_t>(in_request.method));
+                 to_string(in_request.method));
     break;
   }
 

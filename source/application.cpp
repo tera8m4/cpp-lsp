@@ -7,11 +7,6 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
-#if _WIN32
-#include <fcntl.h>
-#include <io.h>
-#endif
-
 namespace application_helper {
 void init_logger() {
   auto new_logger = spdlog::basic_logger_mt("new_default_logger",
@@ -27,10 +22,6 @@ application::application(std::unique_ptr<transport> in_transport)
       lsp_response_factory{std::make_unique<response_factory>()} {
   using namespace application_helper;
   init_logger();
-
-#if _WIN32
-  _setmode(_fileno(stdout), _O_BINARY);
-#endif
 }
 
 application::~application() {}
@@ -53,6 +44,9 @@ void application::process_messages() {
     spdlog::info("process request: {}", to_string(req.method));
 
     const response_message resp = lsp_response_factory->create(req);
+    if (resp.result == nullptr) {
+      return;
+    }
     const std::string &response_str = resp.to_string();
 
     spdlog::info("write response: {}", response_str);
