@@ -1,5 +1,6 @@
 #include "protocol/request/initialize_params.h"
 #include "protocol/request/request_parser.h"
+#include "protocol/request/text_document_change.h"
 #include "protocol/request/text_document_open.h"
 #include <nlohmann/json.hpp>
 
@@ -22,9 +23,14 @@ request request_parser::parse(const std::string_view request_message) {
         data["params"].get<initialize::params>());
     break;
 
-  case request_method::textDocumentDidOpen:
+  case request_method::text_document_did_open:
     req.params = std::make_unique<text_document_open::params>(
         data["params"].get<text_document_open::params>());
+    break;
+
+  case request_method::text_document_did_change:
+    req.params = std::make_unique<text_document_change::params>(
+        data["params"].get<text_document_change::params>());
     break;
 
   case request_method::initialized:

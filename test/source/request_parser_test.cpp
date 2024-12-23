@@ -2,6 +2,7 @@
 #include <format>
 #include <protocol/request/initialize_params.h>
 #include <protocol/request/request_parser.h>
+#include <protocol/request/text_document_change.h>
 #include <protocol/request/text_document_open.h>
 #include <protocol/text_document_item.h>
 #include <string>
@@ -62,4 +63,32 @@ TEST_CASE("parser textDocument/DidOpen") {
     CHECK(item.text == "int main() { return 0; }");
     CHECK(item.uri == "/home/user/main.cpp");
   }
+}
+
+TEST_CASE("parse textDocument/didChange") {
+  const std::string didChangeNotification = R"({ 
+    "id": 1, 
+    "method": "textDocument/didChange",
+    "params": {
+	    "textDocument": {
+		    "uri": "file:///path/to/document.txt",
+		    "version": 2
+	    },
+	    "contentChanges": [
+		    {
+			    "text": "Hello, world!"
+		    }
+	    ]
+    }
+  })";
+
+  const auto &request = request_parser::parse(didChangeNotification);
+  const auto& params =
+      dynamic_cast<lsp::request::text_document_change::params&>(
+          *request.params);
+
+  CHECK(params.text_document.version == 2);
+  CHECK(params.content_changes.size() == 1);
+  CHECK(params.text_document.uri == "/path/to/document.txt");
+  CHECK(params.content_changes[0].text == "Hello, world!");
 }
