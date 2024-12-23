@@ -1,8 +1,16 @@
 #include "protocol/request/initialize_params.h"
 #include "protocol/request/request_parser.h"
 #include "protocol/request/text_document_change.h"
+#include "protocol/request/text_document_hover.h"
 #include "protocol/request/text_document_open.h"
 #include <nlohmann/json.hpp>
+
+namespace {
+template <typename T> std::unique_ptr<T> parse_params(const auto &j) {
+  static_assert(std::derived_from<T, base_params>);
+  return std::make_unique<T>(j["params"].get<T>());
+}
+} // namespace
 
 request request_parser::parse(const std::string_view request_message) {
   using json = nlohmann::json;
@@ -19,18 +27,19 @@ request request_parser::parse(const std::string_view request_message) {
   using namespace lsp::request;
   switch (req.method) {
   case request_method::initialize:
-    req.params = std::make_unique<initialize::params>(
-        data["params"].get<initialize::params>());
+    req.params = parse_params<initialize::params>(data);
     break;
 
   case request_method::text_document_did_open:
-    req.params = std::make_unique<text_document_open::params>(
-        data["params"].get<text_document_open::params>());
+    req.params = parse_params<text_document_open::params>(data);
     break;
 
   case request_method::text_document_did_change:
-    req.params = std::make_unique<text_document_change::params>(
-        data["params"].get<text_document_change::params>());
+    req.params = parse_params<text_document_change::params>(data);
+    break;
+
+  case request_method::text_document_hover:
+    req.params = parse_params<text_document_hover::params>(data);
     break;
 
   case request_method::initialized:

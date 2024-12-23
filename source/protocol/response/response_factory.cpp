@@ -1,4 +1,5 @@
 #include "protocol/request/request.h"
+#include "protocol/response/hover_response.h"
 #include "protocol/response/initialize_response.h"
 #include "protocol/response/response.h"
 #include "protocol/response/response_factory.h"
@@ -13,6 +14,16 @@ std::unique_ptr<base_result> create_initalize_result() {
   res->server_info.name = "my-cpp-lsp";
   res->server_info.version = "0.0.1-alpha";
   res->capabilities.text_document_sync = text_document_sync_type::full;
+  res->capabilities.hover_provider = true;
+
+  return std::move(res);
+}
+
+std::unique_ptr<base_result> create_hover_result() {
+  using namespace lsp::response::hover;
+
+  auto res = std::make_unique<result>();
+  res->contents = "hello from *mylsp*!";
 
   return std::move(res);
 }
@@ -24,6 +35,10 @@ response_message response_factory::create(const request &in_request) const {
   case request_method::initialize: {
     result = create_initalize_result();
   } break;
+
+  case request_method::text_document_hover:
+    result = create_hover_result();
+    break;
   case request_method::initialized:
     break;
   default:

@@ -10,7 +10,9 @@ void result::to_json(json &j) const {
 
 void to_json(nlohmann::json &j, const server_capabilities &capabilities) {
   j = json{
-      {"textDocumentSync", static_cast<int>(capabilities.text_document_sync)}};
+      {"textDocumentSync", static_cast<int>(capabilities.text_document_sync)},
+      {"hoverProvider", capabilities.hover_provider},
+  };
 }
 
 } // namespace lsp::response::initialize

@@ -3,6 +3,7 @@
 #include <protocol/request/initialize_params.h>
 #include <protocol/request/request_parser.h>
 #include <protocol/request/text_document_change.h>
+#include <protocol/request/text_document_hover.h>
 #include <protocol/request/text_document_open.h>
 #include <protocol/text_document_item.h>
 #include <string>
@@ -83,12 +84,29 @@ TEST_CASE("parse textDocument/didChange") {
   })";
 
   const auto &request = request_parser::parse(didChangeNotification);
-  const auto& params =
-      dynamic_cast<lsp::request::text_document_change::params&>(
+  const auto &params =
+      dynamic_cast<lsp::request::text_document_change::params &>(
           *request.params);
 
   CHECK(params.text_document.version == 2);
   CHECK(params.content_changes.size() == 1);
   CHECK(params.text_document.uri == "/path/to/document.txt");
   CHECK(params.content_changes[0].text == "Hello, world!");
+}
+
+TEST_CASE("parse textDocument/hover") {
+  const std::string hover_message = R"({ 
+    "id": 1, 
+    "method": "textDocument/hover",
+    "params": { "textDocument": { "uri": "file:///1.txt" }, "position": { "line": 100, "character": 22 }}                                   
+  })";
+
+  const auto &request = request_parser::parse(hover_message);
+  const auto &params =
+      dynamic_cast<lsp::request::text_document_hover::params &>(
+          *request.params);
+
+  CHECK(params.uri == "/1.txt");
+  CHECK(params.position.line == 100);
+  CHECK(params.position.character == 22);
 }
