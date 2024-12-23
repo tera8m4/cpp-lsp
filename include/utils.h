@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <filesystem>
 namespace utils {
 template <typename T> constexpr uint32_t fnv_hash(T &&s) {
   constexpr uint32_t FNM_PRIME = 16777619u;
@@ -15,5 +16,7 @@ template <typename T> constexpr uint32_t fnv_hash(T &&s) {
 }
 
 void wait_for_debugger();
+
+std::filesystem::path uri2path(std::string_view view);
 
 } // namespace utils

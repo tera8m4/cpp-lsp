@@ -1,5 +1,6 @@
 #include "protocol/request/initialize_params.h"
 #include "protocol/request/request_parser.h"
+#include "protocol/request/text_document_open.h"
 #include <nlohmann/json.hpp>
 
 request request_parser::parse(const std::string_view request_message) {
@@ -14,10 +15,23 @@ request request_parser::parse(const std::string_view request_message) {
   request req{.id = id,
               .method = static_cast<request_method>(string_to_uint(method))};
 
-  if (req.method == request_method::initialize) {
-    using namespace lsp::request;
+  using namespace lsp::request;
+  switch (req.method) {
+  case request_method::initialize:
     req.params = std::make_unique<initialize::params>(
         data["params"].get<initialize::params>());
+    break;
+
+  case request_method::textDocumentDidOpen:
+    req.params = std::make_unique<text_document_open::params>(
+        data["params"].get<text_document_open::params>());
+    break;
+
+  case request_method::initialized:
+    break;
+
+  default:
+    break;
   }
   return req;
 }

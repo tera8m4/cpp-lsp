@@ -45,7 +45,7 @@ void application::process_messages() {
 
     const response_message resp = lsp_response_factory->create(req);
     if (resp.result == nullptr) {
-      return;
+      continue;
     }
     const std::string &response_str = resp.to_string();
 
