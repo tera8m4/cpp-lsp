@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.14...3.22)
 project(
   Greeter
   VERSION 1.0
-  LANGUAGES CXX
+  LANGUAGES CXX C
 )
 
 # ---- Include guards ----
@@ -34,6 +34,13 @@ CPMAddPackage(
 
 CPMAddPackage("gh:nlohmann/json@3.11.3")
 
+CPMAddPackage("gh:tera8m4/cpp-tree-sitter@0.0.2")
+
+add_grammar_from_repo(tree-sitter-cpp
+  https://github.com/tree-sitter/tree-sitter-cpp
+  0.23.4
+)
+
 # ---- Add source files ----
 
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
@@ -52,7 +59,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:spdlog> PUBLIC $<BUILD_INTERFACE:nlohmann_json>)
+target_link_libraries(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:spdlog> PUBLIC $<BUILD_INTERFACE:nlohmann_json> cpp-tree-sitter tree-sitter-cpp)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
@@ -74,5 +81,5 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
   COMPATIBILITY SameMajorVersion
-  DEPENDENCIES "spdlog 1.15.0"
+  DEPENDENCIES "spdlog 1.15.0;cpp-tree-sitter 0.0.1;tree-sitter-cpp 0.23.4"
 )
