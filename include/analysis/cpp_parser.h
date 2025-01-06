@@ -8,10 +8,10 @@
 class cpp_parser {
 public:
   static cpp_parser &get_instance();
-  cpp_parser();
   ts::Tree parse(std::string_view source_code);
 
 private:
+  cpp_parser();
   ts::Language language;
   ts::Parser parser;
 };
