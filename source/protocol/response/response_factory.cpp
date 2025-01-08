@@ -16,7 +16,7 @@ std::unique_ptr<base_result> create_initalize_result() {
   res->capabilities.text_document_sync = text_document_sync_type::full;
   res->capabilities.hover_provider = true;
 
-  return std::move(res);
+  return res;
 }
 
 std::unique_ptr<base_result> create_hover_result() {
@@ -25,7 +25,7 @@ std::unique_ptr<base_result> create_hover_result() {
   auto res = std::make_unique<result>();
   res->contents = "hello from *mylsp*!";
 
-  return std::move(res);
+  return res;
 }
 } // namespace
 

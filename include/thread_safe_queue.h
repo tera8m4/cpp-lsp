@@ -7,7 +7,7 @@
 template<typename T>
 class thread_safe_queue {
 public:
-  explicit thread_safe_queue(int in_max_capacity) : max_capacity{in_max_capacity} {}
+  explicit thread_safe_queue(std::size_t in_max_capacity) : max_capacity{in_max_capacity} {}
   thread_safe_queue(const thread_safe_queue&) = delete;
   thread_safe_queue& operator=(const thread_safe_queue&) = delete;
 
@@ -46,5 +46,5 @@ private:
   std::condition_variable cv_not_empty;
   std::condition_variable cv_not_full;
   std::queue<T> queue;
-  int max_capacity = 1;
+  std::size_t max_capacity = 1;
 };

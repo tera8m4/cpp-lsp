@@ -3,8 +3,6 @@
 #include <spdlog/spdlog.h>
 
 void transport::send(std::string_view in_message) {
-  constexpr std::string_view MESSAGE_FORMAT =
-      "Content-Length: {0}\x0d\x0a\x0d\x0a{1}";
   const std::string result =
       "Content-Length: " + std::to_string(in_message.size()) + "\r\n\r\n" +
       std::string{in_message};

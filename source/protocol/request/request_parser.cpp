@@ -8,7 +8,7 @@
 namespace {
 template <typename T> std::unique_ptr<T> parse_params(const auto &j) {
   static_assert(std::derived_from<T, base_params>);
-  return std::make_unique<T>(j["params"].get<T>());
+  return std::make_unique<T>(j["params"].template get<T>());
 }
 } // namespace
 
