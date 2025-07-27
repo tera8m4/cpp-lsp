@@ -3,6 +3,7 @@
 #include "protocol/request/text_document_change.h"
 #include "protocol/request/text_document_hover.h"
 #include "protocol/request/text_document_open.h"
+#include "protocol/request/workspace_symbol.h"
 #include <nlohmann/json.hpp>
 
 namespace {
@@ -40,6 +41,10 @@ request request_parser::parse(const std::string_view request_message) {
 
   case request_method::text_document_hover:
     req.params = parse_params<text_document_hover::params>(data);
+    break;
+
+  case request_method::workspace_symbol:
+    req.params = parse_params<workspace_symbol::params>(data);
     break;
 
   case request_method::initialized:

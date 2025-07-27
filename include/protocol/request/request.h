@@ -10,6 +10,7 @@ constexpr std::string_view initialized = "initialized";
 constexpr std::string_view text_document_did_open = "textDocument/didOpen";
 constexpr std::string_view text_document_did_change = "textDocument/didChange";
 constexpr std::string_view text_document_hover = "textDocument/hover";
+constexpr std::string_view workspace_symbol = "workspace/symbol";
 } // namespace lsp::request::method
 
 template <typename T> constexpr uint32_t string_to_uint(T &&s) {
@@ -25,6 +26,7 @@ enum class request_method : uint32_t {
       string_to_uint(lsp::request::method::text_document_did_change),
   text_document_hover =
       string_to_uint(lsp::request::method::text_document_hover),
+  workspace_symbol = string_to_uint(lsp::request::method::workspace_symbol),
 
   none = 0
 };
@@ -41,6 +43,8 @@ inline std::string_view to_string(const request_method method) {
     return lsp::request::method::text_document_did_change;
   case request_method::text_document_hover:
     return lsp::request::method::text_document_hover;
+  case request_method::workspace_symbol:
+    return lsp::request::method::workspace_symbol;
   default:
     return "undefined";
   }

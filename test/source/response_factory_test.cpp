@@ -5,6 +5,7 @@
 #include <protocol/response/hover_response.h>
 #include <protocol/response/initialize_response.h>
 #include <protocol/response/response_factory.h>
+#include <protocol/response/workspace_symbol_response.h>
 #include <string>
 #include <string_view>
 
@@ -48,4 +49,34 @@ TEST_CASE("hover response") {
   auto &result = dynamic_cast<lsp::response::hover::result &>(*resp.result);
 
   CHECK(result.contents.size() > 0);
+}
+
+TEST_CASE("workspace symbol response") {
+  const std::string workspace_symbol_message = R"({ 
+    "id": 3, 
+    "method": "workspace/symbol",
+    "params": { "query": "MyClass" }                                   
+  })";
+
+  const auto &req = request_parser::parse(workspace_symbol_message);
+  response_factory factory;
+  auto resp = factory.create(req);
+  
+  CHECK(resp.id == 3);
+  auto &result = dynamic_cast<lsp::response::workspace_symbol::result &>(*resp.result);
+  CHECK(result.symbols.size() == 2);
+  CHECK(result.symbols[0].name == "MyClass");
+  CHECK(result.symbols[0].kind == lsp::response::workspace_symbol::symbol_kind::class_);
+  CHECK(result.symbols[1].name == "myFunction");
+  CHECK(result.symbols[1].kind == lsp::response::workspace_symbol::symbol_kind::function);
+  
+  SUBCASE("workspace symbol response converts to json") {
+    nlohmann::json response_json = resp;
+    CHECK(response_json["result"]["symbols"].is_array());
+    CHECK(response_json["result"]["symbols"].size() == 2);
+    CHECK(response_json["result"]["symbols"][0]["name"].get<std::string>() == "MyClass");
+    CHECK(response_json["result"]["symbols"][0]["kind"].get<int>() == 5);
+    CHECK(response_json["result"]["symbols"][0]["location"]["uri"].get<std::string>() == "file:///example.cpp");
+    CHECK(response_json["result"]["symbols"][1]["containerName"].get<std::string>() == "MyClass");
+  }
 }

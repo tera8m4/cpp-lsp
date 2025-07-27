@@ -12,6 +12,7 @@ enum class text_document_sync_type : int {
 struct server_capabilities {
   text_document_sync_type text_document_sync = text_document_sync_type::none;
   bool hover_provider{false};
+  bool workspace_symbol_provider{false};
 };
 
 struct server_info_t {

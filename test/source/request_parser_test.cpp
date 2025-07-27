@@ -5,6 +5,7 @@
 #include <protocol/request/text_document_change.h>
 #include <protocol/request/text_document_hover.h>
 #include <protocol/request/text_document_open.h>
+#include <protocol/request/workspace_symbol.h>
 #include <protocol/text_document_item.h>
 #include <string>
 #include <string_view>
@@ -109,4 +110,22 @@ TEST_CASE("parse textDocument/hover") {
   CHECK(params.uri == "/1.txt");
   CHECK(params.position.line == 100);
   CHECK(params.position.character == 22);
+}
+
+TEST_CASE("parse workspace/symbol") {
+  const std::string workspace_symbol_message = R"({ 
+    "id": 2, 
+    "method": "workspace/symbol",
+    "params": { "query": "MyClass" }                                   
+  })";
+
+  const auto &request = request_parser::parse(workspace_symbol_message);
+  CHECK(request.method == request_method::workspace_symbol);
+  CHECK(request.id == 2);
+  
+  const auto &params =
+      dynamic_cast<lsp::request::workspace_symbol::params &>(
+          *request.params);
+
+  CHECK(params.query == "MyClass");
 }
