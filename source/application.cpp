@@ -6,6 +6,8 @@
 #include <format>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
+#include "analysis/symbol_database.h"
+#include "analysis/ue_parser.h"
 
 namespace application_helper {
 void init_logger() {
@@ -19,7 +21,8 @@ void init_logger() {
 
 application::application(std::unique_ptr<transport> in_transport)
     : lsp_transport{std::move(in_transport)},
-      lsp_response_factory{std::make_unique<response_factory>()} {
+      symbols{std::make_shared<symbol_database>()},
+      lsp_response_factory{std::make_unique<response_factory>(symbols)} {
   using namespace application_helper;
   init_logger();
 }
@@ -28,6 +31,10 @@ application::~application() {}
 
 void application::run() {
   spdlog::info("start lsp server");
+
+  analysis::ue_parser parser{};
+  std::filesystem::path unreal_path {"/home/tera8/ue/Engine/Source/Runtime/Engine/Classes/GameFramework/"};
+  parser.parse_unreal_source({ unreal_path }, *(symbols.get()));
 
   std::thread process_thread(&application::process_messages, this);
   std::thread receive_thread(&application::receive_messages, this);

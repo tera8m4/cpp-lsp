@@ -21,7 +21,7 @@ TEST_CASE("cpp_parser::parse") {
   const auto &found_declarations = db.lookup_declaration("Class");
   REQUIRE(found_declarations.size() == 5);
 
-  const auto &single_declaration = db.lookup_declaration("A");
+  const auto &single_declaration = db.lookup_declaration("ClassA");
   REQUIRE(single_declaration.size() == 1);
 
   REQUIRE(db.lookup_declaration("foo").size() == 0);

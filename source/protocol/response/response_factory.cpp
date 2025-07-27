@@ -1,4 +1,5 @@
 #include "protocol/request/request.h"
+#include "protocol/request/workspace_symbol.h"
 #include "protocol/response/hover_response.h"
 #include "protocol/response/initialize_response.h"
 #include "protocol/response/response.h"
@@ -30,31 +31,32 @@ std::unique_ptr<base_result> create_hover_result() {
   return res;
 }
 
-std::unique_ptr<base_result> create_workspace_symbol_result() {
+std::unique_ptr<base_result> create_workspace_symbol_result(const symbol_database& database, std::string_view query) {
   using namespace lsp::response::workspace_symbol;
 
   auto res = std::make_unique<result>();
   
-  symbol_information sym1;
-  sym1.name = "MyClass";
-  sym1.kind = symbol_kind::class_;
-  sym1.location_.uri = "file:///tmp/1.cpp";
-  sym1.location_.range.start = {10, 0};
-  sym1.location_.range.end = {20, 0};
-  sym1.container_name = "";
+  auto declarations = database.lookup_declaration(query);
   
-  symbol_information sym2;
-  sym2.name = "myFunction";
-  sym2.kind = symbol_kind::function;
-  sym2.location_.uri = "file:///tmp/1.cpp";
-  sym2.location_.range.start = {25, 4};
-  sym2.location_.range.end = {30, 5};
-  sym2.container_name = "MyClass";
+  for (const auto* decl : declarations) {
+    symbol_information sym;
+    sym.name = std::string(decl->get_name());
+    sym.kind = symbol_kind::class_;
+    
+    const auto& loc = decl->get_location();
+    sym.location_.uri = "file://" + loc.file.string();
+    sym.location_.range.start = {loc.line, loc.column};
+    sym.location_.range.end = {loc.line, loc.column};
+    sym.container_name = "";
+    
+    res->symbols.push_back(sym);
+  }
   
-  res->symbols = {sym1, sym2};
   return res;
 }
 } // namespace
+
+response_factory::response_factory(std::shared_ptr<const symbol_database> in_symbols) : symbols(in_symbols) {}
 
 response_message response_factory::create(const request &in_request) const {
   std::unique_ptr<base_result> result;
@@ -66,9 +68,12 @@ response_message response_factory::create(const request &in_request) const {
   case request_method::text_document_hover:
     result = create_hover_result();
     break;
-  case request_method::workspace_symbol:
-    result = create_workspace_symbol_result();
+  case request_method::workspace_symbol: {
+    auto ws_params = static_cast<const lsp::request::workspace_symbol::params*>(in_request.params.get());
+    std::string_view query = ws_params ? ws_params->query : "";
+    result = create_workspace_symbol_result(*symbols, query);
     break;
+  }
   case request_method::initialized:
     break;
   default:

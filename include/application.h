@@ -5,6 +5,7 @@
 
 class transport;
 class response_factory;
+class symbol_database;
 
 constexpr int MAX_TRANSPORT_QUEUE_SIZE = 10;
 
@@ -17,6 +18,7 @@ public:
 
 private:
   std::unique_ptr<transport> lsp_transport{};
+  std::shared_ptr<symbol_database> symbols;
   std::unique_ptr<response_factory> lsp_response_factory{};
   thread_safe_queue<std::string> message_queue{MAX_TRANSPORT_QUEUE_SIZE};
 

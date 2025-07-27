@@ -19,7 +19,7 @@ public:
   const location &get_location() const;
 
 private:
-  std::string_view name;
+  std::string name;
   location loc;
 };
 } // namespace language
