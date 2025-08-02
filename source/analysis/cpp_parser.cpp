@@ -1,13 +1,16 @@
 #include "analysis/cpp_parser.h"
-
-
-#include <string_view>
-#include <ranges>
+#include "utils.h"
+#include <fstream>
 #include <iostream>
+#include <ranges>
+#include <regex>
+#include <spdlog/spdlog.h>
+#include <sstream>
+#include <string_view>
 #include <vector>
 
 extern "C" {
-TSLanguage *tree_sitter_cpp_ue5();
+TSLanguage *tree_sitter_cpp();
 }
 
 cpp_parser &cpp_parser::get_instance() {
@@ -15,40 +18,67 @@ cpp_parser &cpp_parser::get_instance() {
   return instance;
 }
 
-bool is_forward_declaration(std::string_view line) {
-  return (line.starts_with("class") || line.starts_with("struct")) && line.ends_with(';');
+std::string cleanString(std::string_view input) {
+  static std::vector<std::string> skipline = {
+      "ENUM_CLASS_FLAGS", "UFUNCTION",      "UENUM",
+      "UCLASS",           "UINTERFACE",     "USTRUCT",
+      "UPROPERTY",        "GENERATED_BODY", "DECLARE_"};
+
+  for (const auto &x : skipline) {
+    if (input.contains(x)) {
+      return std::string(input.size(), ' ');
+    }
+  }
+
+  std::string result(input);
+
+  // Define patterns to replace with spaces
+  static std::vector<std::regex> patterns = {
+      std::regex(R"([A-Z]+_API)"),  // ENGINE_API, CORE_API, etc.
+      std::regex(R"(FORCEINLINE)"), // FORCEINLINE
+      std::regex(R"(UMETA\(.*\))"), std::regex(R"(UE_DEPRECATED\(.*\))")};
+
+  // Replace each pattern with spaces
+  for (std::size_t i = 0; i < patterns.size(); i++) {
+    const auto &pattern = patterns[i];
+    std::smatch match;
+    while (std::regex_search(result, match, pattern)) {
+      size_t pos = match.position();
+      size_t len = match.length();
+      result.replace(pos, len, std::string(len, ' '));
+    }
+  }
+
+  return result;
 }
 
-bool predicate(std::string_view line) {
-    // Trim whitespace
-    while (!line.empty() && std::isspace(line.front())) line.remove_prefix(1);
-    while (!line.empty() && std::isspace(line.back())) line.remove_suffix(1);
- 
-  return !line.contains("UPROPERTY") && !line.contains("UFUNCTION") 
-  && !line.contains("UCLASS") && !line.contains("USTRUCT") && !line.contains("GENERATED_BODY")
-  && !line.contains("UENUM") && !line.contains("UE_DEPRECATED") && !line.contains("ENUM_CLASS_FLAGS")
-  && !line.contains("DECLARE_") && !is_forward_declaration(line);
+auto sanitize(std::string_view source) {
+
+  std::stringstream ss;
+  auto lines = std::views::split(source, std::string_view{"\n"}) |
+               std::views::transform([](auto &&range) {
+                 return std::string_view(range.begin(), range.end());
+               });
+
+  std::vector<std::pair<int, int>> offsets;
+  std::vector<std::string_view> sanitized_line;
+  std::string stantizied_line;
+
+  for (const auto &line : lines) {
+    ss << cleanString(line) << '\n';
+  }
+
+  return ss.str();
 }
 
-std::string sanitize(std::string_view source) {
-
- 
-  return std::views::split(source, std::string_view{"\n"}) 
-         | std::views::transform([](auto&& range) {
-               return std::string_view(range.begin(), range.end());
-           })
-        | std::views::filter([](auto&& line) {
-                             return predicate(line);
-                             })
-        | std::views::join_with('\n')
-      | std::ranges::to<std::string>();
-}
-
-cpp_parser::cpp_parser() : language{tree_sitter_cpp_ue5()}, parser{language} {}
+cpp_parser::cpp_parser() : language{tree_sitter_cpp()}, parser{language} {}
 
 ts::Tree cpp_parser::parse(std::string_view source_code) {
-  std::string santized_code = sanitize(source_code);
-
-
-  return parser.parseString(source_code);
+  try {
+    std::string santized_code = sanitize(source_code);
+    return parser.parseString(santized_code);
+  } catch (const std::exception &e) {
+    spdlog::info("Parsing error: {}", e.what());
+    return parser.parseString("");
+  }
 }

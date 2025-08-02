@@ -37,8 +37,8 @@ CPMAddPackage("gh:nlohmann/json@3.11.3")
 CPMAddPackage("gh:tera8m4/cpp-tree-sitter@0.0.2")
 
 add_grammar_from_repo(tree-sitter-cpp
-  https://github.com/tera8m4/tree-sitter-cpp-ue5
-  0.1.0
+  https://github.com/tree-sitter/tree-sitter-cpp
+  0.23.4
 )
 
 
